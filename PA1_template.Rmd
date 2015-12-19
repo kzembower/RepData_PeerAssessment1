@@ -1,25 +1,105 @@
 ---
 title: "Reproducible Research: Peer Assessment 1"
+author: "Kevin Zembower"
 output: 
   html_document:
     keep_md: true
 ---
 
+```{r setup, echo=FALSE}
+# set global chunk options: images will be 7x5 inches
+knitr::opts_chunk$set(fig.width=7, fig.height=5)
+options(digits = 4)
+```
 
 ## Loading and preprocessing the data
 
+The data on personally-recorded activity was loaded from a
+comma-delimited file which was stored on the local drive. This file
+was downloaded from the forked project from the instructor, and
+decompressed using 'unzip' on the command line. The file was loaded
+into R with the commands:
 
+```{r}
+df <- read.csv("activity.csv")
+```
+
+No further processing was needed to produce the subsequent results.
 
 ## What is mean total number of steps taken per day?
 
+The median and mean number of steps taken per day can be produced with these R commands:
 
+```{r}
+tapply(df$steps, df$date, mean)
+tapply(df$steps, df$date, median)
+```
+
+To draw a histogram of the total number of steps taken per day, we can
+execute these R commands:
+
+```{r "Barplot_of_Total_Steps_per_Day"}
+
+tot.steps <- tapply(df$steps, df$date, FUN=sum)
+barplot(tot.steps)
+
+```
+
+The mean number of steps taken per day is
+`r mean(tot.steps, na.rm=TRUE)`
+, while the median number of steps taken per day is
+`r median(tot.steps, na.rm=TRUE)`.
 
 ## What is the average daily activity pattern?
 
+A histogram that illustrates the averae daily activity pattern can be
+generated with:
+
+```{r "Total_Steps_per_5-minute_interval"}
+
+int.steps <- tapply(df$steps,
+                    df$interval,
+                    FUN=mean,
+                    na.rm=TRUE
+                    )
+
+plot(y=int.steps,
+     x=names(int.steps),
+     type='l',
+     main="Average steps per 5-minute interval",
+     xlab='Time at beginning of interval',
+     ylab='Total steps',
+     )
+
+```
+
+NOTE: This chunk would normally be hidden (not echoed), as it is just
+used to calculate a pleasing display of the maximum interval:
+
+```{r}
+
+max.int.steps <- max(int.steps)
+hours <- round( as.numeric(names(int.steps[int.steps==max.int.steps])) / 100 )
+minutes <- as.numeric(names(int.steps[int.steps==max.int.steps])) %% 100
+max.int <- sprintf("%02d:%02d", hours, minutes)
+
+```
+
+The maximum number of steps, `r max(int.steps)`, occurred during the
+interval starting at `r max.int`.
 
 
 ## Imputing missing values
 
+### Calculate the total number of missing values
 
+The total number of missing values of 'steps' in the dataset is
+`r length(df$steps[is.na(df$steps)])`.
+
+```{r}
+
+       
+
+```
 
 ## Are there differences in activity patterns between weekdays and weekends?
