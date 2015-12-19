@@ -21,7 +21,9 @@ decompressed using 'unzip' on the command line. The file was loaded
 into R with the commands:
 
 ```{r}
+
 df <- read.csv("activity.csv")
+
 ```
 
 No further processing was needed to produce the subsequent results.
@@ -31,8 +33,10 @@ No further processing was needed to produce the subsequent results.
 The median and mean number of steps taken per day can be produced with these R commands:
 
 ```{r}
+
 tapply(df$steps, df$date, mean)
 tapply(df$steps, df$date, median)
+
 ```
 
 To draw a histogram of the total number of steps taken per day, we can
@@ -96,10 +100,58 @@ interval starting at `r max.int`.
 The total number of missing values of 'steps' in the dataset is
 `r length(df$steps[is.na(df$steps)])`.
 
+### Strategy for imputting missing values
+
+My strategy to imput the number of steps is to replace NA's with the
+median number of steps for all the days in this interval. I create a
+named array of the median of the steps, and replace all NS's with the
+median value.
+
 ```{r}
 
-       
+steps.median <- tapply(df$steps, df$interval, FUN=median, na.rm=TRUE)
 
 ```
+
+### Create an imputted dataset
+
+These R commands will create a new dataset, `df.imput`, with the same
+characteristics, but with missing `step` values replace with the
+median number of steps for that interval across all days:
+
+```{r imput dataset}
+
+df.imput <- df
+df.imput$steps <- ifelse(is.na(df.imput$steps), steps.median, df.imput$steps)
+
+```
+
+### Create a histogram of the imputted values
+
+This R command will plot a histogram of the imputted value of the
+total steps taken per day:
+
+```{r "Total_Steps_per_5-minute_interval_imputted"}
+
+
+tot.steps.imput <- tapply(df.imput$steps, df.imput$date, FUN=sum)
+barplot(tot.steps.imput)
+
+```
+The mean number of _imputted_ steps taken per day is
+`r mean(tot.steps.imput, na.rm=TRUE)`
+while the mean number of steps taken per day (_not_ imputted) is
+`r mean(tot.steps, na.rm=TRUE)`
+.
+
+The median number of _imputted_ steps taken per day is
+`r median(tot.steps.imput, na.rm=TRUE)`,
+, while the median number of steps taken per day (_not_ imputted) is
+`r median(tot.steps, na.rm=TRUE)`.
+
+The impact of imputting data on the mean and median number of steps
+taken per day is to _decrease_ both values for the imputted compared to
+the non-imputted data.
+
 
 ## Are there differences in activity patterns between weekdays and weekends?
